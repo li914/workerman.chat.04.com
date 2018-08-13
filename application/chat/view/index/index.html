@@ -5,6 +5,14 @@
     <title>Title</title>
 </head>
 <body>
+<script>
+    var ws=new WebSocket('ws://127.0.0.1:31520');
+    ws.onopen=function () {
 
+    }
+    ws.onmessage=function (message) {
+        console.log(message.data);
+    }
+</script>
 </body>
 </html>

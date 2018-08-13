@@ -1,2 +1,6 @@
-*
 !.gitignore
+!js/*
+!css/*
+!js/jquery.js
+!js/bootstrap.js
+!css/bootstrap.css
