@@ -22,7 +22,8 @@ class Events
     }
 
     public static function OnClose($client_id){
-        $msg='{"type":onclose","client_id":"'.$client_id.'","time":"'.date('Y-m-d H:i:s').'"}';
+
+        $msg='{"type":"onclose","client_id":"'.$client_id.'","time":"'.date('Y-m-d H:i:s').'"}';
         echo $msg."\r\n";
     }
 }

@@ -1,17 +1,534 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="keywords" content="WebSocket,WorkerMan服务,PHP,在线聊天,长连接通讯">
+    <meta name="author" content="li914">
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="static/css/bootstrap.css" rel="stylesheet">
+    <script src="static/js/jquery.js"></script>
+    <script src="static/js/bootstrap.js"></script>
+    <script src="static/js/web_socket.js"></script>
+    <script src="static/js/swfobject.js"></script>
+    <script src="static/js/CookieTools.js"></script>
+    <script src="static/js/TimeTools.js"></script>
+    <title>基于workerman和thinkPHP5.1搭建的聊天室</title>
+    <style type="text/css">
+        body {
+
+            background-color: lightcyan;
+            font-size: 16px;
+            line-height: 32px;
+            font-family: "Microsoft Yahei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+
+        .content {
+            background-color: #c7ddef;
+            height: 100vh;
+        }
+
+        .content .msg-list {
+            min-height: 450px;
+            max-height: 65vh;
+            overflow-x: hidden;
+            overflow-y: scroll;
+        }
+
+        .other {
+            width: 100%;
+            clear: both;
+        }
+
+        .other .other-msg-info {
+            float: left;
+            width: 100%;
+            background-color: #c9e2b3;
+            border-bottom: 1px solid rgba(155, 155, 155, 0.3);
+        }
+
+        .other .other-msg-info .other-info {
+            float: left;
+            height: 43px;
+            padding-top: 7px;
+            padding-left: 7px;
+        }
+
+        .other .other-msg-info .other-msg-content {
+            float: left;
+            text-indent: 2em;
+        }
+
+        .my-msg {
+            width: 100%;
+            clear: both;
+        }
+
+        .my-msg .my-msg-info {
+            width: 100%;
+            float: right;
+            background-color: #c9e2b3;
+            border-bottom: 1px solid rgba(155, 155, 155, 0.3);
+        }
+
+        .my-msg .my-info {
+            float: right;
+            height: 43px;
+            padding-top: 7px;
+            padding-right: 7px;
+        }
+
+        .my-msg .my-msg-content {
+            float: right;
+            text-align: right;
+        }
+
+        .my-msg .my-msg-content p {
+            text-indent: 2em;
+            text-align: left;
+            display: inline-block;
+        }
+
+    </style>
 </head>
 <body>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-9 col-xs-12 content">
+            <div class="row msg-list">
+                <!--<div class="other">-->
+                <!--<div class="other-msg-info">-->
+                <!--<div class="other-info">-->
+                <!--<small>other01</small>-->
+                <!--<img src="static/images/li914.jpg" style="display: inline-block;margin-left: 7px;"-->
+                <!--class="img-responsive img-circle" width="41" height="41">-->
+                <!--</div>-->
+                <!--<div class="text-center text-muted time">2018-08-24 09:15</div>-->
+                <!--<div class="other-msg-content">-->
+                <!--你好啊!你好啊!你好啊!你好啊!你好啊!你好啊!你好啊!你好啊!你好啊!你好啊!你好啊!你好啊!你好啊!你好啊!你好啊!你好啊!你好啊!你好啊!-->
+                <!--</div>-->
+                <!--</div>-->
+                <!--</div>-->
+                <!--<div class="my-msg">-->
+                <!--<div class="my-msg-info">-->
+                <!--<div class="my-info">-->
+                <!--<img src="static/images/li914.jpg" style="display: inline-block;margin-right: 7px;"-->
+                <!--class="img-responsive img-circle" width="41" height="41">-->
+                <!--<small>my01</small>-->
+                <!--</div>-->
+                <!--<div class="text-center text-muted time">2018-08-24 19:15</div>-->
+                <!--<div class="my-msg-content">-->
+                <!--<p>你也好啊!你也好啊!你也好啊!你也好啊!你也好啊!你也好啊!你也好啊!你也好啊!你也好啊!你也好啊!你也好啊!你也好啊!</p>-->
+                <!--</div>-->
+                <!--</div>-->
+                <!--</div>-->
+                <!--<div class="text-muted text-center notice">-->
+                <!--欢迎用户 user02 来到本房间 <span>时间:15:35</span>-->
+                <!--</div>-->
+            </div>
+            <div class="row my-input">
+                <form role="form" onsubmit="submitMsg();return false;">
+                    <div class="form-group">
+                        <select class="form-control" style="margin-bottom: 7px;" id="client_list">
+                            <option value="all">所有人</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="height: 85px;">
+                        <!--<div contenteditable="true" style="border-radius:7px;width: 100%;height: 23px;max-height:33px;border: 1px solid rgba(133,133,133,0.3);background-color: #fff;display: block;clear: both;"></div>-->
+                        <textarea class="form-control" id="msg_content" name="content" style="height: 83px;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" class="btn btn-default">表情</button>
+                        <button type="button" id="sendMsg" class="btn btn-success pull-right">发送</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="col-sm-3 col-xs-12 clearfix">
+            <div class="row">
+                <div class="col-xs-12 text-left text-muted">
+                    <div class="caption" id="user_list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="input_name_Modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">请输入用户名,否则系统将自动为你创建!</h4>
+            </div>
+            <div class="modal-body">
+                <input id="name_modal" class="form-control" type="text">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" id="sureName" class="btn btn-success">确定</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+<audio id="noticeVoice" controls hidden>
+    <source src="http://workerman.chat.04.com/static/music/horse.mp3" type="audio/mpeg">
+</audio>
 <script>
-    var ws=new WebSocket('ws://127.0.0.1:31520');
-    ws.onopen=function () {
+    if (typeof console == 'undefined') {
+        this.console = {
+            log: function (msg) {
 
+            }
+        }
     }
-    ws.onmessage=function (message) {
-        console.log(message.data);
+    WEB_SOCKET_SWF_LOCATION = 'static/swf/WebSocketMain.swf';
+    WEB_SOCKET_DEBUG = true;
+    var ws, client_name, client_header, client_id, room_id = '小仙女', client_list_data = {};
+
+    /**
+     * 信息来时通知铃声
+     * */
+    function noticeOpen() {
+        var audio = document.getElementById('noticeVoice');
+        try {
+            if (audio.paused) {
+                audio.load();
+                // audio.play();
+            }
+        } catch (e) {
+            console.log(e);
+        }
+        // var audio=new Audio();
+        // var src='static/music/horse.mp3';
+        // audio.src=src;
+        // var promise;
+        // try {
+        //     promise=audio.play();
+        // }catch (e) {
+        //     console.log(e)
+        // }
+        // console.log(promise);
+    }
+
+    function noticeClose() {
+        document.getElementById('noticeVoice').onpause();
+        // $('#noticeVoice').pause();
+    }
+
+    /**
+     * 连接websocket服务器
+     * */
+    function connect() {
+        try {
+            ws = new WebSocket('ws://127.0.0.1:31520');
+            ws.onopen = ws_open;
+            console.log(ws.readyState);
+            ws.onmessage = ws_message;
+            ws.onclose = function () {
+                connect();
+            };
+            ws.onerror = function () {
+
+            };
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    /**
+     * 接受来自socket服务器的信息
+     * @param msg
+     * */
+    function ws_message(msg) {
+        // console.log(msg.data);
+        var data = JSON.parse(msg.data);
+        // console.log(data);
+        switch (data.type) {
+            //初始化,绑定,发送房间号
+            case 'init':
+                client_id = data.client_id;
+                var sendMsg = {
+                    'type': 'bind',
+                    'client_id': client_id,
+                    'client_name': client_name,
+                    'room_id': room_id,
+                    'time': timeTools.timeStamp()
+                };
+                // console.log(sendMsg);
+                sendMessage('chat/service/bindUid', sendMsg);
+                return;
+            //更新房间里所有在线的用户
+            //{"type":"client_list","time":"11:26:01","list":{"7f00000108fc0000000a":{"room_id":"小仙女","client_name":"小白"}}}
+            case 'client_list':
+                client_list_data = data.list;
+                flush_client_list();
+                return;
+            //加入房间通知:
+            //{type: "join", client_name: "小白", time: "11:23:36"}
+            case 'join':
+                noticeMsg('join', data.client_name, data.time);
+                return;
+            //离开房间通知
+            // {type: "leave", client_name: "小白", time: "11:23:36"}
+            case 'leave':
+                noticeMsg('leave', data.client_name, data.time);
+                return;
+            //接收房间或私聊发来的信息
+            case 'say':
+                noticeOpen();
+                updateMsgList(data.to_client_id, data.to_client_name, data.form_client_name, data.content, data.time, data.form_client_header);
+                return;
+        }
+    }
+
+    /**
+     * 处理加入或离开房间的通知更新
+     * @param type 类型
+     * @param client_name 用户名
+     * @param time 时间(15:35)
+     * */
+    function noticeMsg(type, client_name, time) {
+        var tpl = '';
+        if (type == 'join') {
+            tpl = '<div class="text-muted text-center notice">\n' +
+                '                    欢迎用户 ' + client_name + ' 来到本房间 <span>时间:' + time + '</span>\n' +
+                '                </div>';
+        } else if (type == 'leave') {
+            tpl = '<div class="text-muted text-center notice">\n' +
+                '                    用户 ' + client_name + ' 离开本房间 <span>时间:' + time + '</span>\n' +
+                '                </div>';
+        }
+        $('.msg-list').append(tpl);
+
+        $('.msg-list').scrollTop(30000);
+    }
+
+    /**
+     * 发送信息
+     *@param url 接口网址
+     * @param data 请求提交的数据
+     * @param type 类型
+     * */
+    function sendMessage(url, data, type) {
+        $.post(
+            url,
+            data,
+            function (res, status) {
+                // console.log(res, status);
+                switch (type) {
+                    case 'bind':
+                        return;
+                }
+            },
+            'json'
+        );
+    }
+
+    function ws_open() {
+    }
+
+    /**
+     * 当没有输入用户名,则输出随机用户名
+     * @return string
+     * */
+    function randomName() {
+        var name = ['小猫咪', 'HelloKitty', '迷妹弟弟', '豆浆', '油条', '小仙女', '抠脚大叔', '菠萝蜜', '大虾', '小白', '可爱的大汉', '我是谁!', '你好啊', '罗密欧', '朱丽叶'];
+        var i = parseInt(Math.random() * 15);
+        var getName = name[i];
+        return getName;
+    }
+
+    /**
+     * 随机分配头像
+     * @return string
+     * */
+    function getHeaderPic() {
+        var header = ['header01.jpg', 'header02.jpg', 'header03.jpg', 'header04.jpg', 'header05.jpg', 'header06.jpg', 'header07.jpg', 'header08.jpg',
+            'header09.jpg', 'header10.jpg', 'header11.jpg', 'header12.jpg', 'header13.jpg', 'header14.jpg', 'header15.jpg'];
+        var i = parseInt(Math.random() * 15);
+        return header[i];
+    }
+
+
+    /**
+     * 静态模拟框
+     * 判断是否输入了用户名
+     * */
+    function getNameModal() {
+        $('#input_name_Modal').modal('show');
+        $('#sureName').click(
+            function () {
+                var input = $('#name_modal');
+                var name = $.trim(input.val());
+                if (!name) {
+                    alert('对不起,请输入用户名后确定!');
+                    return;
+                }
+                client_name = name;
+                cookie.setCookie('client_name', client_name);
+                input.val('');
+                $('#input_name_Modal').modal('hide');
+                connect();
+                return;
+            }
+        );
+        $('#input_name_Modal').on('hidden.bs.modal', function () {
+            if (client_name) return;
+            client_name = randomName();
+            cookie.setCookie('client_name', client_name);
+            connect();
+            return;
+        });
+        // return is;
+    }
+
+    /**
+     * 判断发送的类型
+     * */
+    $(function () {
+        select_client_id = 'all';
+        select_client_text = '所有人';
+        $('#client_list').change(function () {
+            select_client_id = $('#client_list option:selected').attr('value');
+            select_client_text = $('#client_list option:selected').text();
+        })
+    });
+
+    /**
+     * 刷新在线用户
+     * */
+    function flush_client_list() {
+        var user_list = $('#user_list');
+        var client_list = $('#client_list');
+        user_list.empty();
+        client_list.empty();
+        user_list.append('<h4>在线用户</h4>');
+        client_list.append('<option value="all" id="client_all">所有人</option>');
+        for (var p in client_list_data) {
+            user_list.append('<li id="' + p + '">' + client_list_data[p].client_name + '</li>');
+            client_list.append('<option value="' + p + '">' + client_list_data[p].client_name + '</option>');
+        }
+        user_list.append('</ul>');
+        $('#client_list').find("option[text='" + select_client_text + "']").attr('selected', true);
+    }
+
+    /**
+     * 发送信息
+     * */
+    function sendContent() {
+        var content = $.trim($('#msg_content').val());
+        var to_client_id = $('#client_list option:selected').attr('value');
+        var to_client_name = $('#client_list option:selected').text();
+        if (!content) {
+            return false;
+        }
+        var url = 'chat/service/sendGroupMsg';
+        if (to_client_id != 'all') {
+            url = 'chat/service/sendPrivateMsg';
+        }
+        if (to_client_id == client_id && to_client_name == client_name) {
+            return false;
+        }
+        var data = {
+            'type': 'say',
+            'to_client_id': to_client_id,
+            'to_client_name': to_client_name,
+            'form_client_id': client_id,
+            'form_client_name': client_name,
+            'room_id': room_id,
+            'content': content,
+            'form_client_header': client_header,
+            'time': timeTools.formatTime('H:i:s')
+        };
+//发送成功后,进行更新聊天
+        var tpl = '<div class="my-msg">\n' +
+            '                    <div class="my-msg-info">\n' +
+            '                        <div class="my-info">\n' +
+            '                            <img src="static/images/chat/header/' + client_header + '"' + 'style="display: inline-block;margin-right: 7px;"\n' +
+            '                                 class="img-responsive img-circle" width="41" height="41">\n' +
+            '                            <small>' + client_name + '</small></div>\n' +
+            '                        <div class="text-center text-muted time">' + timeTools.formatTime('H:i:s') + '</div>\n' +
+            '                        <div class="my-msg-content">\n' +
+            '                            <p>' + content + '</p>\n' +
+            '                        </div>\n' +
+            '                    </div>\n' +
+            '                </div>';
+        $('.msg-list').append(tpl);
+        sendMessage(url, data, 'send');
+        $('#msg_content').val('').focus();
+        $('.msg-list').scrollTop(30000);
+    }
+
+    /**
+     * 刷新信息
+     * */
+    function updateMsgList(to_client_id, to_client_name, form_client_name, content, time, form_client_header) {
+        var tpl = '';
+        if (to_client_id == 'all') {
+            tpl = '<div class="other">\n' +
+                '                    <div class="other-msg-info">\n' +
+                '                        <div class="other-info">\n' +
+                '                            <small>' + form_client_name + '</small>\n' +
+                '                            <img src="static/images//chat/header/' + form_client_header + '"' + 'style="display: inline-block;margin-left: 7px;"\n' +
+                '                                 class="img-responsive img-circle" width="41" height="41">\n' +
+                '                        </div>\n' +
+                '                        <div class="text-center text-muted time">' + time + '</div>\n' +
+                '                        <div class="other-msg-content">\n' + content +
+                '                        </div>\n' +
+                '                    </div>\n' +
+                '                </div>';
+            $('.msg-list').append(tpl);
+        } else {
+            if (to_client_id == client_id && client_name == to_client_name) {
+                tpl = '<div class="other">\n' +
+                    '                    <div class="other-msg-info">\n' +
+                    '                        <div class="other-info">\n' +
+                    '                            <small>' + form_client_name + '</small>\n' +
+                    '                            <img src="static/images//chat/header/' + form_client_header + '"' + 'style="display: inline-block;margin-left: 7px;"\n' +
+                    '                                 class="img-responsive img-circle" width="41" height="41">\n' +
+                    '                        </div>\n' +
+                    '                        <div class="text-center text-muted time"><span style="color: red;">私聊 </span>' + time + '</div>\n' +
+                    '                        <div class="other-msg-content">\n' + content +
+                    '                        </div>\n' +
+                    '                    </div>\n' +
+                    '                </div>';
+                $('.msg-list').append(tpl);
+            }
+        }
+        $('.msg-list').scrollTop(30000);
+    }
+
+    window.onload = function () {
+        client_name = cookie.getCookie('client_name');
+        client_header = cookie.getCookie('client_header');
+        if (!client_header) {
+            client_header = getHeaderPic();
+            cookie.setCookie('client_header', client_header);
+        }
+        if (!client_name) {
+            getNameModal();
+        } else {
+            connect();
+        }
+        $('#sendMsg').click(
+            function (e) {
+                sendContent();
+                // console.log(e);
+            }
+        );
+    };
+    /**
+     * 当页面关闭时,发送信息,通知该用户离开房间
+     * */
+    window.onbeforeunload = function () {
+        var msg = {
+            'type': 'leave',
+            'time': timeTools.formatTime('H:i:s'),
+            'client_name': client_name,
+            'room_id': room_id
+        };
+        sendMessage('chat/service/leaveGroupMsg', msg, 'leave');
     }
 </script>
 </body>
