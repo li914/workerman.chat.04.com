@@ -3,7 +3,7 @@
 #####在线体验
 [传送门](http://api.li914.com/chat)
 
-![演示图片](https://github.com/li914/workerman.chat.04.com/public/static/images/demo/01.png)
+![演示图片](https://github.com/li914/workerman.chat.04.com/blob/master/public/static/images/demo/01.png)
 
 1.下载该项目
 
