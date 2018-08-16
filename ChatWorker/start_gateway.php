@@ -12,13 +12,6 @@ use \Workerman\Autoloader;
 
 require_once __DIR__.'/../vendor/autoload.php';
 
-//$context=array(
-//    'local_cert'=>'/root/ssl/workerman.li914.com/workerman.li914.com.pem',
-//    'local_pk'=>'/root/ssl/workerman.li914.com/workerman.li914.com.key',
-//    'verify_peer'=>false
-//);
-//
-//$gateway->transport='ssl';
 
 $gateway=new Gateway('Websocket://0.0.0.0:31520');
 

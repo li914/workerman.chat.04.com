@@ -11,7 +11,6 @@ namespace app\chat\controller;
 
 use GatewayClient\Gateway;
 use think\Controller;
-use think\Exception;
 use think\facade\Request;
 
 
@@ -119,7 +118,6 @@ class Service extends Controller
             $this->fail['msg']='该请求参数不正确!';
             return $this->fail;
         }
-        file_put_contents('./log.txt',json_encode($data,JSON_UNESCAPED_UNICODE));
         $client_name=$data['client_name'];
         $time=$data['time'];
         $room_id=$data['room_id'];
