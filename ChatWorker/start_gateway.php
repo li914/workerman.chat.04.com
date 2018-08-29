@@ -26,6 +26,14 @@ $gateway->startPort=2300;
 $gateway->registerAddress='127.0.0.1:1236';
 
 
+//添加心跳
+//$gateway->pingInterval=55;
+//
+//$gateway->pingNotResponseLimit=1;
+//
+//$gateway->pingData='{"type":"ping"}';
+
+
 if (!defined('GLOBAL_START')){
     Worker::runAll();
 }

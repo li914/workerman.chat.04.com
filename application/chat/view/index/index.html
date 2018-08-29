@@ -7,6 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="static/css/bootstrap.css" rel="stylesheet">
     <script src="static/js/jquery.js"></script>
+    <script src="static/emoji/jquery.qqface.min.js"></script>
+    <script src="static/emoji/emojiStr.js"></script>
     <script src="static/js/bootstrap.js"></script>
     <script src="static/js/web_socket.js"></script>
     <script src="static/js/swfobject.js"></script>
@@ -28,8 +30,8 @@
         }
 
         .content .msg-list {
-            min-height: 450px;
-            max-height: 65vh;
+            min-height: 430px;
+            max-height: 63vh;
             overflow-x: hidden;
             overflow-y: scroll;
         }
@@ -132,15 +134,18 @@
                             <option value="all">所有人</option>
                         </select>
                     </div>
-                    <div class="form-group" style="height: 85px;">
-                        <!--<div contenteditable="true" style="border-radius:7px;width: 100%;height: 23px;max-height:33px;border: 1px solid rgba(133,133,133,0.3);background-color: #fff;display: block;clear: both;"></div>-->
-                        <textarea class="form-control" id="msg_content" name="content" style="height: 83px;"></textarea>
+                    <div class="form-group clearfix">
+                        <!--<button type="button" id="sendMsg" class="btn btn-success pull-right">发送</button>-->
+                        <button type="button" id="qqfaceBtn" class="btn btn-default pull-right">表情</button>
                     </div>
-                    <div class="form-group">
-                        <button type="button" class="btn btn-default">表情</button>
-                        <button type="button" id="sendMsg" class="btn btn-success pull-right">发送</button>
+                    <div class="form-group clearfix" style="height: 85px;">
+                        <!--<div contenteditable="true" style="border-radius:7px;width: 100%;height: 23px;max-height:33px;border: 1px solid rgba(133,133,133,0.3);background-color: #fff;display: block;clear: both;"></div>-->
+                        <textarea placeholder="回车可快速发送信息" class="form-control" id="msg_content" name="content" style="height: 83px;"></textarea>
                     </div>
                 </form>
+                <div class="form-group clearfix">
+                    <button type="button" id="sendMsg" class="btn btn-success pull-right">发送</button>
+                </div>
             </div>
         </div>
         <div class="col-sm-3 col-xs-12 clearfix">
@@ -228,8 +233,8 @@
             ws.onclose = function () {
                 connect();
             };
-            ws.onerror = function () {
-
+            ws.onerror = function (e) {
+                console.log(e)
             };
         } catch (e) {
             console.log(e);
@@ -243,7 +248,7 @@
     function ws_message(msg) {
         // console.log(msg.data);
         var data = JSON.parse(msg.data);
-        // console.log(data);
+        console.log(data);
         switch (data.type) {
             //初始化,绑定,发送房间号
             case 'init':
@@ -441,7 +446,9 @@
             'form_client_header': client_header,
             'time': timeTools.formatTime('H:i:s')
         };
+        sendMessage(url, data, 'send');
 //发送成功后,进行更新聊天
+        content=parseContent(content);
         var tpl = '<div class="my-msg">\n' +
             '                    <div class="my-msg-info">\n' +
             '                        <div class="my-info">\n' +
@@ -455,7 +462,6 @@
             '                    </div>\n' +
             '                </div>';
         $('.msg-list').append(tpl);
-        sendMessage(url, data, 'send');
         $('#msg_content').val('').focus();
         $('.msg-list').scrollTop(30000);
     }
@@ -464,6 +470,7 @@
      * 刷新信息
      * */
     function updateMsgList(to_client_id, to_client_name, form_client_name, content, time, form_client_header) {
+        content=parseContent(content);
         var tpl = '';
         if (to_client_id == 'all') {
             tpl = '<div class="other">\n' +
@@ -499,6 +506,22 @@
         $('.msg-list').scrollTop(30000);
     }
 
+    function parseContent(content){
+        var patt=/\[\:[\u4e00-\u9fa5]+\]/g;
+        var result=content.match(patt);
+        if (result){
+            var patt02=/^\[\:/;
+            var patt03=/\]$/;
+            var tmp='';
+            for (var i=0;i<result.length;++i){
+                tmp=result[i].replace(patt02,'');
+                tmp=tmp.replace(patt03,'');
+                content=content.replace(result[i],'<img src="static/emoji/gif/'+qqFaceStr(tmp)+'.gif" border="0"  width="25" height="25"/>');
+            }
+        }
+        return content;
+    }
+
     window.onload = function () {
         client_name = cookie.getCookie('client_name');
         client_header = cookie.getCookie('client_header');
@@ -513,11 +536,30 @@
         }
         $('#sendMsg').click(
             function (e) {
+                // var content=$('#msg_content').val();
+
                 sendContent();
                 // console.log(e);
             }
         );
+        $("#msg_content").keydown(function (event) {
+            if (event.keyCode==13){
+                if ($.trim($('#msg_content').val())){
+                    sendContent();
+                }
+                $('#msg_content').val('').focus();
+            }
+        });
     };
+
+
+    $.qqface({
+        imgPath:'static/emoji/gif/',
+        textarea:$('#msg_content'),
+        handle:$('#qqfaceBtn')
+    });
+
+
     /**
      * 当页面关闭时,发送信息,通知该用户离开房间
      * */

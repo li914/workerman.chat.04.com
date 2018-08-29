@@ -22,6 +22,7 @@ class Events
      * 该方法不用添加任何业务处理,所有的业务处理都交给thinkphp5.1的控制器Service里处理!
     */
     public static function onMessage($client_id,$message){
+        echo "onMessage:".$client_id.$message."\r\n";
     }
     /**
      * 当客户端断开连接时触发
