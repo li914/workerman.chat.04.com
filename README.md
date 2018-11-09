@@ -3,7 +3,7 @@
 ##### 在线体验
 [传送门](https://api.li914.com/chat)
 
-![演示图片](https://gitee.com/li914/workerman.chat.04.com/blob/master/public/static/images/demo/01.png)
+![演示图片](https://gitee.com/li914/workerman-websocket/blob/master/public/static/images/demo/01.png)
 
 ##### 写在前面：deepin系统，php7.2,thinkphp5.1
 
