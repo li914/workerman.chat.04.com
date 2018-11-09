@@ -1,3 +1,4 @@
+<?php /*a:1:{s:70:"/data/www/workerman.chat.04.com/application/chat/view/index/index.html";i:1541752838;}*/ ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>

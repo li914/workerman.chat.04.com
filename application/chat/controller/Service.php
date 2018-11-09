@@ -24,6 +24,7 @@ class Service extends Controller
         $this->fail=config('fail');
     }
 
+    //名称和uid进行绑定
     public function bindUid(){
         if (!Request::isAjax()){
             $this->fail['msg']='该请求方式不正确!';
@@ -50,12 +51,13 @@ class Service extends Controller
         try{
             Gateway::sendToGroup($room_id,json_encode($list,true));
         }catch (\Exception $e){
-            Gateway::sendToGroup($room_id,json_encode($list,true));
+//            Gateway::sendToGroup($room_id,json_encode($list,true));
         }
         $this->success['msg']='绑定成功,并且加入房间';
         $this->success['result']=$client_list;
         return $this->success;
     }
+    //发送群组信息
     public function sendGroupMsg(){
         if (!Request::isAjax()){
             $this->fail['msg']='该请求方式不正确!';
@@ -84,6 +86,7 @@ class Service extends Controller
         $this->success['result']=$data;
         return $this->success;
     }
+    //发送私聊信息
     public function sendPrivateMsg(){
         if (!Request::isAjax()){
             $this->fail['msg']='该请求方式不正确!';
@@ -108,6 +111,7 @@ class Service extends Controller
         $this->success['result']=$data;
         return $this->success;
     }
+    //通知离开群组信息
     public function leaveGroupMsg(){
         if (!Request::isAjax()){
             $this->fail['msg']='该请求方式不正确!';
@@ -122,7 +126,10 @@ class Service extends Controller
         $time=$data['time'];
         $room_id=$data['room_id'];
         $msg='{"type":"leave","client_name":"'.$client_name.'","time":"'.$time.'"}';
-        Gateway::sendToGroup($room_id,$msg);
+        try {
+            Gateway::sendToGroup($room_id, $msg);
+        } catch (\Exception $e) {
+        }
         $this->success['result']=$data;
         return $this->success;
     }
