@@ -1,0 +1,93 @@
+body {
+
+    background-color: lightcyan;
+    font-size: 16px;
+    line-height: 32px;
+    font-family: "Microsoft Yahei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.content {
+    background-color: #c7ddef;
+    height: 100vh;
+}
+
+.content .msg-list {
+    min-height: 430px;
+    max-height: 63vh;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+.msg-other {
+    clear: both;
+    margin-top: 7px;
+    padding: 3px;
+}
+
+.msg-other .msg-other-container {
+    display: inline;
+    padding: 7px;
+}
+
+.msg-other .msg-other-container .msg-other-content {
+    background-color: rgba(224, 244, 244, 1);
+    color: #333333;
+    text-indent: 2em;
+    word-wrap: break-word;
+    line-height: 120%;
+    box-shadow: 3px 3px 5px 1px rgba(224, 244, 244, 0.6);
+    padding: 5px;
+}
+.msg-other .msg-other-container .msg-other-content .chat-pic{
+    max-height: 180px;
+    height: 180px;
+    min-width: 65px;
+    min-height: 65px;
+}
+
+.msg-user {
+    margin-top: 7px;
+    padding: 3px;
+}
+
+.msg-user .msg-user-container {
+    display: inline;
+    padding: 7px;
+}
+
+.msg-user .msg-user-container .msg-user-content {
+    background-color: rgba(201, 226, 179, 1);
+    color: #333333;
+    text-align: left;
+    word-wrap: break-word;
+    line-height: 120%;
+    box-shadow: 3px 3px 5px 1px rgba(201, 226, 179, 0.6);
+    padding: 5px;
+    clear: both;
+}
+
+.msg-user .msg-user-container .msg-user-content p {
+    text-align: right;
+    text-indent: 2em;
+    /*display: inline-block;*/
+}
+.msg-user .msg-user-container .msg-user-content .chat-pic{
+    max-height: 180px;
+    height: 180px;
+    min-width: 65px;
+    min-height: 65px;
+}
+
+#qqfaceBtn {
+    background-color: rgba(255, 255, 255, 0);
+    border: none;
+    padding: 3px;
+    margin: 3px;
+}
+
+#fatupian {
+    background-color: rgba(255, 255, 255, 0);
+    border: none;
+    padding: 3px;
+    margin: 3px;
+}

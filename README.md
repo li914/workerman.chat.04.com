@@ -19,7 +19,7 @@ git clone git@github.com:li914/workerman.chat.04.com.git
 cd workerman.chat.04.com
 ```
 
-3.添加依赖
+3.添加依赖******
 
 ```
 composer install
