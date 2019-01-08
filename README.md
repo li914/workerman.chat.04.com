@@ -25,11 +25,13 @@ cd workerman.chat.04.com
 composer install
 ```
 4.启动workerman服务
-
+####### linux系统启动方式：
 ```aidl
 cd ChatWorker
 php start.php start
 ```
+####### Windows系统启动方式：
+打开项目文件夹，进入ChatWorker目录，然后双击start_for_win.bat文件（本人在虚拟机，系统windows7专业版，可以正常启动workerman服务）
 
 5.然后在浏览器 输入:URL/chat
 
